@@ -1,0 +1,384 @@
+.adminPage {
+  width: min(1320px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 34px 0 64px;
+  color: #1f2340;
+  display: grid;
+  gap: 20px;
+  text-align: left;
+}
+
+.header,
+.panel,
+.deniedCard,
+.loginCard {
+  border: 1px solid #dfe5ef;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.header {
+  padding: 26px;
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+}
+
+.header span {
+  color: #5f46d8;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.header h1,
+.panel h2,
+.deniedCard h1 {
+  margin: 6px 0 0;
+  color: #1f2340;
+  font-family: Inter, system-ui, "Segoe UI", Roboto, sans-serif;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-align: left;
+}
+
+.header h1 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.05;
+}
+
+.header p,
+.panel p,
+.deniedCard p {
+  margin: 8px 0 0;
+  color: #667085;
+  line-height: 1.65;
+  text-align: left;
+}
+
+.header button,
+.pricingRow button {
+  min-height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: #1f2340;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 850;
+  padding: 0 16px;
+}
+
+.header button:disabled,
+.pricingRow button:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metricCard {
+  border: 1px solid #dfe5ef;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.metricCard span {
+  color: #667085;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.metricCard strong {
+  color: #1f2340;
+  font-size: 1.38rem;
+  font-weight: 950;
+  line-height: 1.15;
+}
+
+.metricCard em {
+  color: #8a94a6;
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.panel,
+.deniedCard,
+.loginCard {
+  padding: 22px;
+}
+
+.loginCard {
+  width: min(480px, 100%);
+  margin: 40px auto;
+  display: grid;
+  gap: 18px;
+}
+
+.loginCard span {
+  color: #5f46d8;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.adminLoginForm {
+  display: grid;
+  gap: 12px;
+}
+
+.adminLoginForm label {
+  color: #344054;
+  display: grid;
+  gap: 6px;
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+.adminLoginForm input {
+  min-height: 42px;
+  border: 1px solid #cfd6e8;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1f2340;
+  padding: 0 12px;
+  font: inherit;
+}
+
+.adminLoginForm button {
+  min-height: 42px;
+  border: none;
+  border-radius: 8px;
+  background: #1f2340;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.adminLoginForm button:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.pricingList {
+  display: grid;
+  gap: 12px;
+}
+
+.pricingRow {
+  border: 1px solid #e4e9f2;
+  border-radius: 10px;
+  background: #fbfcff;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: minmax(180px, 1.2fr) minmax(180px, 1fr) minmax(130px, 0.8fr) minmax(130px, 0.8fr) auto auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.modelIdentity,
+.pricingRow label {
+  display: grid;
+  gap: 6px;
+}
+
+.modelIdentity strong {
+  color: #1f2340;
+  font-size: 0.95rem;
+}
+
+.modelIdentity span,
+.pricingRow label {
+  color: #667085;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.pricingRow input {
+  min-height: 38px;
+  border: 1px solid #cfd6e8;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1f2340;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 0.86rem;
+}
+
+.activeToggle {
+  min-height: 38px;
+  display: inline-flex !important;
+  grid-auto-flow: column;
+  align-items: center;
+  gap: 8px !important;
+}
+
+.activeToggle input {
+  min-height: auto;
+  width: 16px;
+  height: 16px;
+  accent-color: #5f46d8;
+}
+
+.inlineError,
+.errorBox {
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff1f2;
+  color: #be123c;
+  padding: 10px 12px;
+  font-weight: 750;
+}
+
+.inlineError {
+  grid-column: 1 / -1;
+}
+
+.userCards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.userCard {
+  border: 1px solid #e4e9f2;
+  border-radius: 10px;
+  background: #fbfcff;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.userCard strong,
+.userTable strong {
+  color: #1f2340;
+  display: block;
+}
+
+.userCard span,
+.userTable span {
+  color: #667085;
+  font-size: 0.78rem;
+}
+
+.userCard dl {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.userCard dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.userCard dt {
+  color: #667085;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.userCard dd {
+  margin: 0;
+  color: #1f2340;
+  font-weight: 900;
+}
+
+.tableWrap {
+  overflow: auto;
+}
+
+.userTable {
+  width: 100%;
+  min-width: 920px;
+  border-collapse: collapse;
+}
+
+.userTable th,
+.userTable td {
+  border-bottom: 1px solid #e4e9f2;
+  padding: 13px 10px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.userTable th {
+  color: #667085;
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.userTable td {
+  color: #344054;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.roleAdmin,
+.roleUser {
+  border-radius: 999px;
+  display: inline-flex;
+  padding: 5px 9px;
+  font-size: 0.76rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.roleAdmin {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.roleUser {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+@media (max-width: 1180px) {
+  .metricGrid,
+  .userCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pricingRow {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .adminPage {
+    width: min(100% - 24px, 1320px);
+    padding-top: 24px;
+  }
+
+  .header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .metricGrid,
+  .userCards,
+  .pricingRow {
+    grid-template-columns: 1fr;
+  }
+}

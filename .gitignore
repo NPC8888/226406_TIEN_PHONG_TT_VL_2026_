@@ -1,0 +1,29 @@
+# Backend secrets/env
+back_end_api/.env
+back_end_api/service-account.json
+
+
+# Python env/cache
+back_end_api/venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Frontend env/build/deps
+fe_react_UI/.env
+fe_react_UI/node_modules/
+fe_react_UI/dist/
+
+# Logs/cache
+*.log
+.cache/
+.pytest_cache/
+~$*.docx
+
+# OS/IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

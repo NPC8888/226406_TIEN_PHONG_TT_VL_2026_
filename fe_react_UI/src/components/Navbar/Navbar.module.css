@@ -1,0 +1,396 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  width: 100%;
+  border-bottom: 1px solid #e1e5ef;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+}
+
+.navInner {
+  width: min(1160px, calc(100% - 64px));
+  min-height: 82px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(210px, auto) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 22px;
+}
+
+.brandArea {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+}
+
+.brandMarkWrap {
+  width: 50px;
+  height: 50px;
+  border: 1px solid #d8d1ff;
+  border-radius: 12px;
+  background: #ffffff;
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 26px rgba(82, 70, 224, 0.1);
+}
+
+.brandMark {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.brandCopy {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.brandLogo {
+  color: #10183a;
+  font-size: 1.42rem;
+  font-weight: 950;
+  line-height: 1.05;
+}
+
+.brandTag {
+  color: #7b8499;
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.navLinks,
+.actionsArea {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navLinks {
+  justify-content: center;
+  gap: 22px;
+}
+
+.actionsArea {
+  justify-content: flex-end;
+}
+
+.navLink,
+.loginLink {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #10183a;
+  cursor: pointer;
+  font-size: 0.92rem;
+  font-weight: 850;
+  line-height: 1;
+  padding: 14px 18px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.navLink:hover,
+.loginLink:hover,
+.navLinkActive {
+  border-color: transparent;
+  background: #f0edff;
+  color: #4f45df;
+}
+
+.creditPill {
+  min-height: 50px;
+  border: 1px solid #a7ead1;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #ecfff8, #f6fffb);
+  color: #04845b;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 18px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.creditPill span {
+  font-size: 0.93rem;
+  font-weight: 950;
+}
+
+.creditPill::before {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background:
+    linear-gradient(#11a56f, #11a56f) center 4px / 11px 3px no-repeat,
+    linear-gradient(#11a56f, #11a56f) center 8px / 11px 3px no-repeat,
+    linear-gradient(#11a56f, #11a56f) center 12px / 11px 3px no-repeat;
+  content: "";
+}
+
+.creditPill em {
+  color: #04845b;
+  font-size: 0.77rem;
+  font-style: normal;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.profileMenu {
+  position: relative;
+}
+
+.profileTrigger {
+  max-width: 240px;
+  min-height: 50px;
+  border: 1px solid #cbd6f0;
+  border-radius: 15px;
+  background: #ffffff;
+  color: #111827;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 12px 6px 7px;
+  transition: box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.profileTrigger:hover {
+  border-color: #b8c4d5;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+}
+
+.profileAvatar,
+.profileAvatarFallback {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+}
+
+.profileAvatar {
+  object-fit: cover;
+}
+
+.profileAvatarFallback {
+  background: linear-gradient(135deg, #7081ff, #8d75ff);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 950;
+}
+
+.profileCopy {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+  text-align: left;
+}
+
+.profileName {
+  max-width: 132px;
+  color: #10183a;
+  font-size: 0.84rem;
+  font-weight: 900;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileHint {
+  color: #7b8499;
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+
+.profileChevron {
+  color: #667085;
+  font-size: 0.72rem;
+}
+
+.profileDropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 250px;
+  border: 1px solid #dbe3ee;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 22px 54px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(18px);
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.profileDropdownHeader {
+  border-bottom: 1px solid #edf1f7;
+  padding: 8px 10px 10px;
+}
+
+.profileDropdownName {
+  color: #111827;
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.profileDropdownEmail {
+  margin-top: 4px;
+  color: #667085;
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
+.profileDropdownLink,
+.profileDropdownAction {
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 850;
+  padding: 11px 12px;
+  text-align: left;
+  text-decoration: none;
+}
+
+.profileDropdownLink {
+  background: #f8fafc;
+  color: #111827;
+}
+
+.profileDropdownAction {
+  background: #fff1f2;
+  color: #be123c;
+}
+
+.proButton {
+  min-height: 48px;
+  border-radius: 8px;
+  color: #ffffff;
+  background: #111827;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 900;
+  line-height: 1;
+  padding: 0 16px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 1080px) {
+  .navInner {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "brand actions"
+      "links links";
+    padding: 10px 0;
+    row-gap: 8px;
+  }
+
+  .brandArea { grid-area: brand; }
+  .navLinks { grid-area: links; justify-content: flex-start; overflow-x: auto; padding-bottom: 2px; }
+  .actionsArea { grid-area: actions; }
+}
+
+@media (max-width: 720px) {
+  .navInner {
+    width: min(100% - 24px, 1180px);
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "brand"
+      "links"
+      "actions";
+  }
+
+  .brandArea {
+    justify-self: center;
+  }
+
+  .navLinks,
+  .actionsArea {
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+
+  .profileTrigger {
+    max-width: 190px;
+  }
+
+  .profileName {
+    max-width: 82px;
+  }
+
+  .profileDropdown {
+    right: auto;
+    left: 0;
+  }
+}
+
+.brandMarkWrap,
+.navLink,
+.creditPill,
+.profileTrigger,
+.proButton,
+.loginLink {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.brandArea:hover .brandMarkWrap {
+  box-shadow: 0 14px 30px rgba(82, 70, 224, 0.16);
+  transform: translateY(-2px) rotate(-2deg);
+}
+
+.navLink:hover,
+.loginLink:hover,
+.creditPill:hover,
+.profileTrigger:hover,
+.proButton:hover {
+  transform: translateY(-2px);
+}
+
+.navLinkActive {
+  box-shadow: inset 0 -2px 0 #6549f4;
+}
+
+.profileDropdown {
+  animation: navMenuIn 0.18s ease both;
+}
+
+@keyframes navMenuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brandMarkWrap,
+  .navLink,
+  .creditPill,
+  .profileTrigger,
+  .proButton,
+  .loginLink,
+  .profileDropdown {
+    animation: none;
+    transition: none;
+  }
+}

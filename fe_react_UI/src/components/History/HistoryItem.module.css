@@ -1,0 +1,142 @@
+.historyItem {
+  min-height: 230px;
+  border: 1px solid #dfe4f2;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 18px;
+  text-align: left;
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  box-shadow: 0 14px 34px rgba(44, 52, 103, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.historyItem:hover {
+  border-color: #cfc4ff;
+  box-shadow: 0 24px 54px rgba(82, 70, 224, 0.12);
+  transform: translateY(-4px);
+}
+
+.cardTop,
+.metaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.groupBadge,
+.statusBadge,
+.creditBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 0.8rem;
+  font-weight: 950;
+}
+
+.groupBadge {
+  gap: 7px;
+  background: #f0edff;
+  color: #6549f4;
+}
+
+.groupBadge i {
+  width: 13px;
+  height: 13px;
+  border-radius: 4px;
+  border: 2px solid currentColor;
+}
+
+.statusBadge,
+.creditBadge {
+  background: #e8fbf3;
+  color: #00936d;
+}
+
+.statusBadge::after {
+  width: 7px;
+  height: 7px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+
+.timeText,
+.metaText {
+  color: #687394;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.titleChips {
+  min-height: 35px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.titleChips span {
+  max-width: 100%;
+  border: 1px solid #dfe4f2;
+  border-radius: 999px;
+  padding: 8px 13px;
+  background: #f8faff;
+  color: #35405f;
+  font-size: 0.84rem;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.viewDetailsBtn {
+  position: relative;
+  overflow: hidden;
+  justify-self: start;
+  border: none;
+  border-radius: 8px;
+  min-height: 42px;
+  padding: 0 16px;
+  background: #07122e;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.88rem;
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow: 0 12px 22px rgba(7, 18, 46, 0.18);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.viewDetailsBtn::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.35) 45%, transparent 72%);
+  content: "";
+  transform: translateX(-125%);
+  transition: transform 0.55s ease;
+}
+
+.viewDetailsBtn:hover {
+  box-shadow: 0 16px 30px rgba(7, 18, 46, 0.24);
+  transform: translateY(-2px);
+}
+
+.viewDetailsBtn:hover::after {
+  transform: translateX(125%);
+}
+
+@media (max-width: 720px) {
+  .historyItem {
+    min-height: auto;
+    padding: 16px;
+  }
+}
