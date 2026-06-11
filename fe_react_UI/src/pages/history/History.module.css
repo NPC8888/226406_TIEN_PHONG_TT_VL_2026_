@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,0,0");
+
 .historyContainer {
   position: relative;
   width: min(1160px, calc(100% - 64px));
@@ -21,14 +23,15 @@
 
 .header {
   position: relative;
-  min-height: 225px;
+  min-height: 245px;
   overflow: hidden;
   border: 1px solid #dfe4f2;
-  border-radius: 18px;
+  border-radius: 20px;
   background:
-    linear-gradient(100deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.88) 58%, rgba(241, 238, 255, 0.78) 100%);
-  box-shadow: 0 18px 46px rgba(44, 52, 103, 0.07);
-  padding: 32px 34px;
+    radial-gradient(circle at 86% 38%, rgba(117, 95, 255, 0.16), transparent 30%),
+    linear-gradient(100deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.9) 57%, rgba(240, 237, 255, 0.86) 100%);
+  box-shadow: 0 22px 54px rgba(44, 52, 103, 0.08);
+  padding: 38px 42px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 330px;
   gap: 24px;
@@ -38,13 +41,22 @@
 
 .header::after {
   position: absolute;
-  right: -60px;
-  bottom: -90px;
-  width: 430px;
-  height: 240px;
-  border-radius: 60% 0 0 0;
-  background: linear-gradient(135deg, rgba(220, 232, 255, 0.72), rgba(244, 240, 255, 0.18));
+  right: -56px;
+  bottom: -108px;
+  width: 470px;
+  height: 280px;
+  border-radius: 70% 0 0 0;
+  background: linear-gradient(135deg, rgba(211, 227, 255, 0.78), rgba(244, 240, 255, 0.22));
   content: "";
+}
+
+.materialIcon {
+  font-family: "Material Symbols Rounded";
+  font-feature-settings: "liga";
+  font-size: inherit;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1;
 }
 
 .kicker {
@@ -97,59 +109,50 @@
 .paperIcon {
   position: absolute;
   right: 86px;
-  top: 8px;
-  width: 120px;
-  height: 138px;
-  border-radius: 24px;
-  background: linear-gradient(145deg, #eee9ff, #d7ceff);
-  box-shadow: 0 22px 44px rgba(101, 73, 244, 0.15);
+  top: 4px;
+  width: 128px;
+  height: 142px;
+  border-radius: 26px;
+  background: linear-gradient(145deg, #efeaff, #d8d0ff);
+  color: #8167ff;
+  display: grid;
+  place-items: center;
+  font-size: 4.8rem;
+  box-shadow: 0 26px 52px rgba(101, 73, 244, 0.17);
   transform: rotate(13deg);
 }
 
-.paperIcon i {
-  position: absolute;
-  left: 28px;
-  right: 26px;
-  height: 10px;
-  border-radius: 999px;
-  background: #a997ff;
-}
-
-.paperIcon i:first-child { top: 36px; }
-.paperIcon i:nth-child(2) { top: 60px; }
-.paperIcon i:nth-child(3) { top: 84px; width: 48px; right: auto; }
-
 .historyOrb {
   position: absolute;
-  right: 50px;
+  right: 44px;
   top: 108px;
-  width: 54px;
-  height: 54px;
+  width: 62px;
+  height: 62px;
   border-radius: 50%;
   background: linear-gradient(135deg, #8c70ff, #5e46ef);
   color: #ffffff;
   display: grid;
   place-items: center;
-  font-size: 2.2rem;
+  font-size: 2rem;
   font-weight: 500;
   box-shadow: 0 18px 34px rgba(94, 70, 239, 0.28);
 }
 
 .toolbar {
   display: grid;
-  grid-template-columns: minmax(290px, 1fr) 185px 175px 175px;
-  gap: 14px;
+  grid-template-columns: minmax(310px, 1fr) 190px 180px 180px;
+  gap: 16px;
   align-items: stretch;
 }
 
 .searchBox,
 .sortBox,
 .summaryCard {
-  min-height: 98px;
+  min-height: 112px;
   border: 1px solid #dfe4f2;
-  border-radius: 13px;
-  background: rgba(255, 255, 255, 0.86);
-  box-shadow: 0 14px 34px rgba(44, 52, 103, 0.05);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 16px 38px rgba(44, 52, 103, 0.06);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
@@ -157,11 +160,11 @@
 .sortBox {
   position: relative;
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr);
+  grid-template-columns: 46px minmax(0, 1fr);
   grid-template-rows: auto auto;
-  gap: 6px 16px;
+  gap: 7px 18px;
   align-content: center;
-  padding: 18px 22px;
+  padding: 20px 24px;
   text-align: left;
 }
 
@@ -173,40 +176,23 @@
   transform: translateY(-3px);
 }
 
-.searchBox i,
-.sortBox i,
-.summaryCard i {
+.toolIcon,
+.summaryIcon {
   grid-row: 1 / span 2;
-  width: 34px;
-  height: 34px;
+  width: 42px;
+  height: 42px;
   border-radius: 12px;
-  background: #f0ecff;
+  background: linear-gradient(135deg, #f0ecff, #e8e0ff);
+  color: #6549f4;
+  display: grid;
+  place-items: center;
+  font-size: 1.45rem;
   align-self: center;
 }
 
-.searchBox i::before {
-  display: block;
-  width: 11px;
-  height: 11px;
-  margin: 9px auto 0;
-  border: 3px solid #6549f4;
-  border-radius: 50%;
-  content: "";
-}
-
-.sortBox i::before {
-  display: block;
-  width: 15px;
-  height: 16px;
-  margin: 9px auto 0;
-  border-top: 3px solid #6549f4;
-  border-bottom: 3px solid #6549f4;
-  content: "";
-}
-
-.searchBox span,
-.sortBox span,
-.summaryCard span {
+.searchBox > span:not(.toolIcon),
+.sortBox > span:not(.toolIcon),
+.summaryCard > span:not(.summaryIcon) {
   color: #111640;
   font-size: 0.9rem;
   font-weight: 950;
@@ -231,24 +217,27 @@
 
 .summaryCard {
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr);
+  grid-template-columns: 58px minmax(0, 1fr);
   grid-template-rows: auto auto;
   align-content: center;
   align-items: center;
   gap: 3px 12px;
-  padding: 18px 22px;
+  padding: 20px 24px;
   text-align: left;
 }
 
-.summaryCard i {
+.summaryIcon {
   grid-row: 1 / span 2;
-  width: 52px;
-  height: 52px;
-  background: #f0ecff;
+  width: 54px;
+  height: 54px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #f0ecff, #e6ddff);
+  font-size: 1.75rem;
 }
 
-.summaryCard:nth-child(4) i {
-  background: #e8fbf3;
+.summaryCard:nth-child(4) .summaryIcon {
+  background: linear-gradient(135deg, #e8fbf3, #dff8ec);
+  color: #0f9f78;
 }
 
 .summaryCard strong {

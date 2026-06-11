@@ -23,7 +23,7 @@ class PostCreate(BaseModel):
     titles: list[str]
     style: str
     sections: list[Section]
-    ai_provider: Literal["groq", "vertex_gemini"] = "groq"
+    ai_provider: Literal["groq", "vertex_gemini", "gemini_api_key"] = "groq"
     ai_model: Optional[str] = None
 
     @field_validator("titles", mode="before")

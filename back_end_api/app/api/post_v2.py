@@ -1,4 +1,5 @@
 from json import dumps
+import os
 import unicodedata
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -25,12 +26,30 @@ from app.services.credit_service import (
     get_credit_balance,
 )
 from app.services.auth_service import decode_access_token
-from app.services.groq_service import call_ai_api, suggest_section_outlines, suggest_writing_styles
-from app.services.vertex_gemini_service import call_vertex_gemini_api
+from app.services.groq_service import call_ai_api
+from app.services.gemini_api_key_service import (
+    call_gemini_api_key_api,
+    suggest_section_outlines_with_api_key,
+    suggest_writing_styles_with_api_key,
+)
+from app.services.vertex_gemini_service import call_vertex_gemini_api, suggest_section_outlines, suggest_writing_styles
 
 router = APIRouter()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+SUPPORTED_BILLED_AI_PROVIDERS = {"vertex_gemini", "gemini_api_key"}
+
+
+def _selected_ai_provider() -> str:
+    configured_provider = os.getenv("AI_PROVIDER", "").strip()
+    if configured_provider:
+        return configured_provider
+    return "vertex_gemini"
+
+
+def _effective_post(post: PostCreate) -> PostCreate:
+    configured_model = os.getenv("GEMINI_MODEL", "").strip()
+    return post.model_copy(update={"ai_model": configured_model or None})
 
 
 def _normalize_unicode(text: str) -> str:
@@ -61,8 +80,10 @@ async def generate_content(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    if post.ai_provider != "vertex_gemini":
-        raise HTTPException(status_code=400, detail="Credit billing currently supports only Vertex Gemini models.")
+    post = _effective_post(post)
+    ai_provider = _selected_ai_provider()
+    if ai_provider not in SUPPORTED_BILLED_AI_PROVIDERS:
+        raise HTTPException(status_code=400, detail="Credit billing currently supports only Gemini providers.")
 
     estimate = estimate_generation_usage(post, db)
     try:
@@ -76,8 +97,10 @@ async def generate_content(
             ),
         )
 
-    if post.ai_provider == "vertex_gemini":
+    if ai_provider == "vertex_gemini":
         list_response = await call_vertex_gemini_api(post)
+    elif ai_provider == "gemini_api_key":
+        list_response = await call_gemini_api_key_api(post)
     else:
         list_response = await call_ai_api(post)
     failed_items = [item for item in list_response if _is_ai_error(item.content)]
@@ -110,7 +133,7 @@ async def generate_content(
     prompt = dumps(
         {
             "style": post.style,
-            "ai_provider": post.ai_provider,
+            "ai_provider": ai_provider,
             "ai_model": post.ai_model,
             "sections": outline_json,
             "template_plan": list_response[0].template_plan if list_response else None,
@@ -171,8 +194,10 @@ async def estimate_generate_content(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    if post.ai_provider != "vertex_gemini":
-        raise HTTPException(status_code=400, detail="Credit billing currently supports only Vertex Gemini models.")
+    post = _effective_post(post)
+    ai_provider = _selected_ai_provider()
+    if ai_provider not in SUPPORTED_BILLED_AI_PROVIDERS:
+        raise HTTPException(status_code=400, detail="Credit billing currently supports only Gemini providers.")
     estimate = estimate_generation_usage(post, db)
     balance = get_credit_balance(current_user)
     return {
@@ -188,13 +213,19 @@ async def estimate_generate_content(
 
 @router.post("/writing-style-suggestions", response_model=WritingStyleSuggestionResponse)
 async def writing_style_suggestions(payload: WritingStyleSuggestionRequest):
-    suggestions = await suggest_writing_styles(payload.titles)
+    if _selected_ai_provider() == "gemini_api_key":
+        suggestions = await suggest_writing_styles_with_api_key(payload.titles)
+    else:
+        suggestions = await suggest_writing_styles(payload.titles)
     return {"suggestions": [_normalize_unicode(item) for item in suggestions]}
 
 
 @router.post("/section-outline-suggestions", response_model=SectionOutlineSuggestionResponse)
 async def section_outline_suggestions(payload: SectionOutlineSuggestionRequest):
-    layouts = await suggest_section_outlines(payload.titles, payload.style, payload.description)
+    if _selected_ai_provider() == "gemini_api_key":
+        layouts = await suggest_section_outlines_with_api_key(payload.titles, payload.style, payload.description)
+    else:
+        layouts = await suggest_section_outlines(payload.titles, payload.style, payload.description)
     return layouts if isinstance(layouts, dict) else {"layouts": layouts}
 
 

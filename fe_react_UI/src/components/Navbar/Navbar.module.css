@@ -1,7 +1,7 @@
 .navbar {
   position: sticky;
   top: 0;
-  z-index: 30;
+  z-index: 100;
   width: 100%;
   border-bottom: 1px solid #e1e5ef;
   background: rgba(255, 255, 255, 0.9);
@@ -309,26 +309,112 @@
 @media (max-width: 720px) {
   .navInner {
     width: min(100% - 24px, 1180px);
-    grid-template-columns: 1fr;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
-      "brand"
-      "links"
-      "actions";
+      "brand actions"
+      "links links";
+    gap: 8px 10px;
+    padding: 8px 0 10px;
   }
 
   .brandArea {
-    justify-self: center;
+    justify-self: start;
+    gap: 8px;
   }
 
-  .navLinks,
-  .actionsArea {
+  .brandMarkWrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  .brandMark {
+    width: 28px;
+    height: 28px;
+  }
+
+  .brandLogo {
+    font-size: 1.12rem;
+  }
+
+  .brandTag {
+    display: none;
+  }
+
+  .navLinks {
     width: 100%;
     justify-content: flex-start;
     overflow-x: auto;
+    gap: 8px;
+    padding: 2px 0 4px;
+    scrollbar-width: none;
+  }
+
+  .navLinks::-webkit-scrollbar {
+    display: none;
+  }
+
+  .actionsArea {
+    width: auto;
+    justify-content: flex-end;
+    gap: 6px;
+    overflow: visible;
+  }
+
+  .navLink,
+  .loginLink {
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.84rem;
+  }
+
+  .proButton {
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 0.82rem;
+  }
+
+  .creditPill {
+    min-height: 38px;
+    border-radius: 10px;
+    gap: 5px;
+    padding: 0 10px;
+  }
+
+  .creditPill span {
+    font-size: 0.84rem;
+  }
+
+  .creditPill em {
+    display: none;
+  }
+
+  .creditPill::before {
+    width: 13px;
+    height: 13px;
+    background:
+      linear-gradient(#11a56f, #11a56f) center 3px / 9px 2px no-repeat,
+      linear-gradient(#11a56f, #11a56f) center 7px / 9px 2px no-repeat,
+      linear-gradient(#11a56f, #11a56f) center 11px / 9px 2px no-repeat;
   }
 
   .profileTrigger {
-    max-width: 190px;
+    min-height: 38px;
+    max-width: none;
+    border-radius: 10px;
+    gap: 5px;
+    padding: 4px 8px 4px 5px;
+  }
+
+  .profileAvatar,
+  .profileAvatarFallback {
+    width: 28px;
+    height: 28px;
+  }
+
+  .profileCopy {
+    display: none;
   }
 
   .profileName {
@@ -336,8 +422,24 @@
   }
 
   .profileDropdown {
-    right: auto;
-    left: 0;
+    right: 0;
+    left: auto;
+    min-width: min(280px, calc(100vw - 24px));
+  }
+}
+
+@media (max-width: 420px) {
+  .brandLogo {
+    font-size: 1rem;
+  }
+
+  .loginLink {
+    display: none;
+  }
+
+  .proButton {
+    min-height: 36px;
+    padding: 0 10px;
   }
 }
 

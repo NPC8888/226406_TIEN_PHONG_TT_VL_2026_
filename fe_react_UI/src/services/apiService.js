@@ -109,10 +109,18 @@ export const purchasePlan = async (planSlug) => postJsonData("/subscriptions/pur
 export const getActiveSubscription = async () => fetchJsonData("/subscriptions/active", true);
 export const getCreditBalance = async () => fetchJsonData("/credits/balance", true);
 export const getHistory = async () => fetchJsonData("/posts/history", true);
-export const getAdminDashboard = async () => fetchJsonData("/admin/dashboard", true);
+export const getAdminDashboard = async (params = {}) => {
+  const query = new URLSearchParams(Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== ""));
+  return fetchJsonData(`/admin/dashboard${query.toString() ? `?${query.toString()}` : ""}`, true);
+};
 export const loginAdmin = async (payload) => postJsonData("/admin/login", payload, false);
+export const getAdminEnvSettings = async () => fetchJsonData("/admin/env-settings", true);
+export const updateAdminEnvSettings = async (items) => postJsonData("/admin/env-settings", { items }, true, "PUT");
 export const updateModelPricing = async (modelKey, payload) =>
   postJsonData(`/admin/model-pricing/${encodeURIComponent(modelKey)}`, payload, true, "PUT");
+export const getAdminPostDetail = async (postId) => fetchJsonData(`/admin/posts/${postId}`, true);
+export const listGeminiModels = async () => fetchJsonData("/admin/gemini/models", true);
+export const testGeminiKey = async (payload) => postJsonData("/admin/gemini/test-key", payload, true);
 
 export const submitPostForm = (url, fields) => {
   const form = document.createElement("form");

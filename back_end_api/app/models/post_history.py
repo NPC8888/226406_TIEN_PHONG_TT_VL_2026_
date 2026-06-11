@@ -11,7 +11,7 @@ class PostHistory(Base):
     post_id = Column(ForeignKey("posts.id"), nullable=False)
     user_id = Column(ForeignKey("users.id"), nullable=False)
     title = Column(String(255), nullable=False)
-    prompt = Column(Text, nullable=True)
+    prompt = Column(Text().with_variant(mysql.LONGTEXT(), "mysql"), nullable=True)
     content = Column(Text().with_variant(mysql.LONGTEXT(), "mysql"), nullable=True)
     outline_json = Column(JSON, nullable=True)
     input_tokens = Column(Integer, nullable=False, default=0)

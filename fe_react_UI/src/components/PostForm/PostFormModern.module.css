@@ -179,6 +179,41 @@
   box-shadow: 0 16px 34px rgba(90, 67, 210, 0.14);
 }
 
+.suggestIcon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+  font-family: "Material Symbols Rounded";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  font-feature-settings: "liga";
+  line-height: 1;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.suggestIconLoading::before {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 999px;
+  background: transparent;
+  animation: suggestIconSpin 0.8s linear infinite;
+  transform: none;
+}
+
+@keyframes suggestIconSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .createGrid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 425px;
@@ -1044,7 +1079,7 @@
 /* Keep AI style suggestions above the outline builder */
 .createMain .fieldCard {
   position: relative;
-  z-index: 30;
+  z-index: 2;
   overflow: visible;
 }
 
@@ -2118,7 +2153,7 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  z-index: 1000;
   background: rgba(26, 22, 58, 0.34);
   display: grid;
   place-items: center;
@@ -2951,10 +2986,9 @@
 .compareGrid {
   min-height: 0;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: auto;
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(320px, 420px);
+  grid-template-columns: repeat(var(--compare-count, 2), minmax(0, 1fr));
   gap: 14px;
   padding: 16px;
   background: #fcfbff;
@@ -2962,6 +2996,7 @@
 
 .compareColumn {
   min-height: 0;
+  min-width: 0;
   border: 1px solid rgba(125, 76, 255, 0.1);
   border-radius: 18px;
   background: #ffffff;
@@ -3379,7 +3414,7 @@
   }
 
   .compareGrid {
-    grid-auto-columns: minmax(280px, 86vw);
+    grid-template-columns: 1fr;
   }
 
   .sectionCompactDesc {

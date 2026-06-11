@@ -48,6 +48,7 @@ GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/google/callback")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+GOOGLE_TOKEN_CLOCK_SKEW_SECONDS = int(os.getenv("GOOGLE_TOKEN_CLOCK_SKEW_SECONDS", "10"))
 
 router = APIRouter()
 
@@ -75,7 +76,12 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
 def verify_google_token(token: str) -> dict:
     try:
-        idinfo = id_token.verify_oauth2_token(token, requests.Request(), GOOGLE_CLIENT_ID)
+        idinfo = id_token.verify_oauth2_token(
+            token,
+            requests.Request(),
+            GOOGLE_CLIENT_ID,
+            clock_skew_in_seconds=GOOGLE_TOKEN_CLOCK_SKEW_SECONDS,
+        )
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid Google token: {exc}")
 

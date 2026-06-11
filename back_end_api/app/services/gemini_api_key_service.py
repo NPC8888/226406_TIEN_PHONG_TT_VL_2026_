@@ -4,15 +4,11 @@ import asyncio
 import json
 import os
 import re
-import threading
 import time
-import urllib.error
-import urllib.request
-from pathlib import Path
 
 from dotenv import load_dotenv
-from google.auth.transport.requests import Request
-from google.oauth2 import service_account
+from google import genai
+from google.genai import types
 
 from app.schemas.post_generation_schemas import GeneratedArticlePayload, GeneratedSection, PostCreate, TemplatePlan
 from app.services.groq_service import (
@@ -35,16 +31,10 @@ from app.services.post_prompt_service import (
 
 load_dotenv()
 
-DEFAULT_SERVICE_ACCOUNT_FILE = Path(__file__).resolve().parents[2] / "service-account.json"
-VERTEX_SERVICE_ACCOUNT_FILE = os.getenv("VERTEX_SERVICE_ACCOUNT_FILE", str(DEFAULT_SERVICE_ACCOUNT_FILE))
-VERTEX_PROJECT_ID = os.getenv("VERTEX_PROJECT_ID")
-VERTEX_LOCATION = os.getenv("VERTEX_LOCATION", "global")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
-VERTEX_MAX_CONCURRENCY = int(os.getenv("VERTEX_MAX_CONCURRENCY", "6"))
-VERTEX_SCOPE = "https://www.googleapis.com/auth/cloud-platform"
-_credentials_lock = threading.Lock()
-_cached_credentials = None
-_cached_project_id = None
+GEMINI_API_MAX_CONCURRENCY = int(os.getenv("GEMINI_API_MAX_CONCURRENCY", "6"))
+_client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
 
 def _empty_usage() -> dict[str, int]:
@@ -60,68 +50,6 @@ def _combine_usage(*items: dict | None) -> dict[str, int]:
         combined["output_tokens"] += int(item.get("output_tokens") or 0)
         combined["total_tokens"] += int(item.get("total_tokens") or ((item.get("input_tokens") or 0) + (item.get("output_tokens") or 0)))
     return combined
-
-
-def _extract_vertex_usage(payload: dict) -> dict[str, int]:
-    usage = payload.get("usageMetadata") or {}
-    input_tokens = int(usage.get("promptTokenCount") or 0)
-    output_tokens = int(usage.get("candidatesTokenCount") or 0)
-    total_tokens = int(usage.get("totalTokenCount") or (input_tokens + output_tokens))
-    return {"input_tokens": input_tokens, "output_tokens": output_tokens, "total_tokens": total_tokens}
-
-
-def _load_credentials_from_file():
-    if not Path(VERTEX_SERVICE_ACCOUNT_FILE).exists():
-        raise RuntimeError(f"Missing Vertex service account file: {VERTEX_SERVICE_ACCOUNT_FILE}")
-
-    return service_account.Credentials.from_service_account_file(
-        VERTEX_SERVICE_ACCOUNT_FILE,
-        scopes=[VERTEX_SCOPE],
-    )
-
-
-def _get_credentials():
-    global _cached_credentials
-    global _cached_project_id
-
-    with _credentials_lock:
-        if _cached_credentials is None:
-            _cached_credentials = _load_credentials_from_file()
-            _cached_project_id = _get_project_id(_cached_credentials)
-
-        if not _cached_credentials.valid or _cached_credentials.expired:
-            _cached_credentials.refresh(Request())
-
-        return _cached_credentials, _cached_project_id
-
-
-def _get_project_id(credentials) -> str:
-    project_id = VERTEX_PROJECT_ID or getattr(credentials, "project_id", None)
-    if not project_id:
-        raise RuntimeError("Missing Vertex project id. Set VERTEX_PROJECT_ID or include project_id in service-account.json.")
-    return project_id
-
-
-def _vertex_endpoint(project_id: str, model: str) -> str:
-    if VERTEX_LOCATION == "global":
-        host = "aiplatform.googleapis.com"
-    else:
-        host = f"{VERTEX_LOCATION}-aiplatform.googleapis.com"
-    return (
-        f"https://{host}/v1/projects/{project_id}/locations/{VERTEX_LOCATION}"
-        f"/publishers/google/models/{model}:generateContent"
-    )
-
-
-def _extract_vertex_text(payload: dict) -> str:
-    candidates = payload.get("candidates") or []
-    if not candidates:
-        raise ValueError("Vertex Gemini returned no candidates.")
-    parts = candidates[0].get("content", {}).get("parts") or []
-    text = "".join(part.get("text", "") for part in parts if isinstance(part, dict))
-    if not text.strip():
-        raise ValueError("Vertex Gemini returned an empty text response.")
-    return text.strip()
 
 
 def _extract_json_object(text: str) -> str:
@@ -141,30 +69,26 @@ def _normalize_json_text(text: str) -> str:
     return normalized
 
 
-def _post_vertex_json(url: str, token: str, body: dict) -> dict:
-    request = urllib.request.Request(
-        url,
-        data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json; charset=utf-8",
-        },
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=120) as response:
-            return json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as error:
-        detail = error.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"Vertex Gemini HTTP {error.code}: {detail}") from error
+def _usage_from_response(response) -> dict[str, int]:
+    usage = getattr(response, "usage_metadata", None)
+    input_tokens = int(getattr(usage, "prompt_token_count", 0) or 0)
+    output_tokens = int(getattr(usage, "candidates_token_count", 0) or 0)
+    total_tokens = int(getattr(usage, "total_token_count", 0) or (input_tokens + output_tokens))
+    return {"input_tokens": input_tokens, "output_tokens": output_tokens, "total_tokens": total_tokens}
 
 
-def _is_retryable_vertex_error(error: Exception) -> bool:
+def _get_client():
+    if _client is None:
+        raise RuntimeError("Missing GEMINI_API_KEY. Set it in .env or admin environment settings.")
+    return _client
+
+
+def _is_retryable_gemini_error(error: Exception) -> bool:
     message = str(error).lower()
-    return any(marker in message for marker in ("429", "500", "502", "503", "504", "timeout", "temporarily"))
+    return any(marker in message for marker in ("429", "500", "502", "503", "504", "timeout", "temporarily", "unavailable"))
 
 
-async def _create_vertex_json(
+async def _create_gemini_json(
     tracker: GroqCallTracker,
     stage_label: str,
     system_prompt: str,
@@ -172,38 +96,25 @@ async def _create_vertex_json(
     model: str,
     title: str | None = None,
 ) -> tuple[dict, dict[str, int]]:
-    tracker.log_call(stage_label, title=title, extra=f"provider=vertex_gemini model={model}")
-    credentials, project_id = await asyncio.to_thread(_get_credentials)
-    body = {
-        "systemInstruction": {
-            "parts": [{"text": system_prompt}],
-        },
-        "contents": [
-            {
-                "role": "user",
-                "parts": [{"text": user_prompt}],
-            }
-        ],
-        "generationConfig": {
-            "temperature": 0.75,
-            "maxOutputTokens": 8192,
-            "responseMimeType": "application/json",
-        },
-    }
+    tracker.log_call(stage_label, title=title, extra=f"provider=gemini_api_key model={model}")
     started_at = time.perf_counter()
-    response_payload = await asyncio.to_thread(
-        _post_vertex_json,
-        _vertex_endpoint(project_id, model),
-        credentials.token,
-        body,
+    response = await _get_client().aio.models.generate_content(
+        model=model,
+        contents=user_prompt,
+        config=types.GenerateContentConfig(
+            system_instruction=system_prompt,
+            temperature=0.75,
+            max_output_tokens=8192,
+            response_mime_type="application/json",
+        ),
     )
     elapsed = time.perf_counter() - started_at
-    print(f"[VertexGeminiCall][{tracker.request_id}] stage={stage_label} title={title or '-'} elapsed={elapsed:.2f}s")
-    json_text = _normalize_json_text(_extract_json_object(_extract_vertex_text(response_payload)))
-    return json.loads(json_text), _extract_vertex_usage(response_payload)
+    print(f"[GeminiApiKeyCall][{tracker.request_id}] stage={stage_label} title={title or '-'} elapsed={elapsed:.2f}s")
+    json_text = _normalize_json_text(_extract_json_object(response.text or ""))
+    return json.loads(json_text), _usage_from_response(response)
 
 
-async def _create_vertex_json_with_retry(
+async def _create_gemini_json_with_retry(
     tracker: GroqCallTracker,
     stage_label: str,
     system_prompt: str,
@@ -214,10 +125,10 @@ async def _create_vertex_json_with_retry(
     last_error = None
     for attempt in range(3):
         try:
-            return await _create_vertex_json(tracker, stage_label, system_prompt, user_prompt, model, title)
+            return await _create_gemini_json(tracker, stage_label, system_prompt, user_prompt, model, title)
         except Exception as error:
             last_error = error
-            if attempt < 2 and (isinstance(error, json.JSONDecodeError) or _is_retryable_vertex_error(error)):
+            if attempt < 2 and (isinstance(error, json.JSONDecodeError) or _is_retryable_gemini_error(error)):
                 tracker.log_retry(stage_label, title, attempt + 1, error)
                 await asyncio.sleep(1.5 * (attempt + 1))
                 continue
@@ -226,7 +137,7 @@ async def _create_vertex_json_with_retry(
 
 
 async def _generate_template_plan(post: PostCreate, tracker: GroqCallTracker, model: str) -> tuple[TemplatePlan, dict[str, int]]:
-    template_json, usage = await _create_vertex_json_with_retry(
+    template_json, usage = await _create_gemini_json_with_retry(
         tracker,
         "template",
         ARTICLE_SYSTEM_PROMPT,
@@ -249,7 +160,7 @@ async def _generate_template_plan(post: PostCreate, tracker: GroqCallTracker, mo
 
 
 async def _generate_one(title: str, style: str, template_plan: TemplatePlan, tracker: GroqCallTracker, model: str):
-    article_json, usage = await _create_vertex_json_with_retry(
+    article_json, usage = await _create_gemini_json_with_retry(
         tracker,
         "article",
         ARTICLE_SYSTEM_PROMPT,
@@ -265,7 +176,7 @@ async def _generate_one(title: str, style: str, template_plan: TemplatePlan, tra
     article_payload = article_payload.model_copy(update={"sections": normalized_sections})
     diagnostics = _build_generation_diagnostics(template_plan, article_payload)
     diagnostics["call_summary"] = tracker.summary()
-    diagnostics["provider"] = "vertex_gemini"
+    diagnostics["provider"] = "gemini_api_key"
     diagnostics["model"] = model
     diagnostics["usage"] = usage
     return ArticleGenerationResult(
@@ -278,12 +189,12 @@ async def _generate_one(title: str, style: str, template_plan: TemplatePlan, tra
     )
 
 
-async def call_vertex_gemini_api(post: PostCreate):
+async def call_gemini_api_key_api(post: PostCreate):
     model = post.ai_model or GEMINI_MODEL
-    tracker = GroqCallTracker(request_id=f"vertex-{len(post.titles)}t-{len(post.sections)}s")
+    tracker = GroqCallTracker(request_id=f"gemini-key-{len(post.titles)}t-{len(post.sections)}s")
     template_plan, template_usage = await _generate_template_plan(post, tracker, model)
 
-    semaphore = asyncio.Semaphore(max(1, VERTEX_MAX_CONCURRENCY))
+    semaphore = asyncio.Semaphore(max(1, GEMINI_API_MAX_CONCURRENCY))
 
     async def generate_with_limit(title: str):
         async with semaphore:
@@ -296,7 +207,7 @@ async def call_vertex_gemini_api(post: PostCreate):
     normalized_results: list[ArticleGenerationResult] = []
     for title, result in zip(post.titles, results):
         if isinstance(result, Exception):
-            print(f"Vertex Gemini error for {title}: {result}")
+            print(f"Gemini API key error for {title}: {result}")
             normalized_results.append(
                 ArticleGenerationResult(
                     title=title,
@@ -315,11 +226,11 @@ async def call_vertex_gemini_api(post: PostCreate):
             "run_usage": run_usage,
             "template_usage": template_usage,
         }
-    print(f"[VertexGeminiSummary][{tracker.request_id}] {tracker.summary()} usage={run_usage}")
+    print(f"[GeminiApiKeySummary][{tracker.request_id}] {tracker.summary()} usage={run_usage}")
     return normalized_results
 
 
-async def suggest_writing_styles(titles: list[str]) -> list[str]:
+async def suggest_writing_styles_with_api_key(titles: list[str]) -> list[str]:
     cleaned_titles = [title.strip() for title in titles if isinstance(title, str) and title.strip()]
     fallback = [
         "SEO gioi thieu tung chu de",
@@ -335,8 +246,8 @@ async def suggest_writing_styles(titles: list[str]) -> list[str]:
         return fallback
 
     try:
-        tracker = GroqCallTracker(request_id=f"vertex-style-{len(cleaned_titles)}t")
-        payload, _usage = await _create_vertex_json_with_retry(
+        tracker = GroqCallTracker(request_id=f"gemini-key-style-{len(cleaned_titles)}t")
+        payload, _usage = await _create_gemini_json_with_retry(
             tracker,
             "style_suggestions",
             ARTICLE_SYSTEM_PROMPT,
@@ -352,18 +263,18 @@ async def suggest_writing_styles(titles: list[str]) -> list[str]:
                     cleaned.append(value[:90])
         return cleaned[:12] or fallback
     except Exception as error:
-        print(f"Vertex Gemini style suggestion error: {error}")
+        print(f"Gemini API key style suggestion error: {error}")
         return fallback
 
 
-async def suggest_section_outlines(titles: list[str], style: str, description: str = "") -> list[dict]:
+async def suggest_section_outlines_with_api_key(titles: list[str], style: str, description: str = "") -> list[dict]:
     cleaned_titles = [title.strip() for title in titles if isinstance(title, str) and title.strip()]
     if not cleaned_titles:
         return _fallback_outline_layouts()
 
     try:
-        tracker = GroqCallTracker(request_id=f"vertex-outline-{len(cleaned_titles)}t")
-        payload, _usage = await _create_vertex_json_with_retry(
+        tracker = GroqCallTracker(request_id=f"gemini-key-outline-{len(cleaned_titles)}t")
+        payload, _usage = await _create_gemini_json_with_retry(
             tracker,
             "outline_suggestions",
             ARTICLE_SYSTEM_PROMPT,
@@ -401,5 +312,5 @@ async def suggest_section_outlines(titles: list[str], style: str, description: s
                 normalized_layouts.append(normalized)
         return normalized_layouts[:3] or _fallback_outline_layouts()
     except Exception as error:
-        print(f"Vertex Gemini outline suggestion error: {error}")
+        print(f"Gemini API key outline suggestion error: {error}")
         return _fallback_outline_layouts()

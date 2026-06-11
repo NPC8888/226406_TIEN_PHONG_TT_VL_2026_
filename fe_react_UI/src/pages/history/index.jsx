@@ -181,17 +181,19 @@ function History() {
         </div>
         <div className={styles.headerArt} aria-hidden="true">
           <div className={styles.paperIcon}>
-            <i />
-            <i />
-            <i />
+            <span className={styles.materialIcon}>article</span>
           </div>
-          <span className={styles.historyOrb}>‹</span>
+          <span className={styles.historyOrb}>
+            <span className={styles.materialIcon}>history</span>
+          </span>
         </div>
       </div>
 
       <div className={styles.toolbar}>
         <label className={styles.searchBox}>
-          <i aria-hidden="true" />
+          <span className={styles.toolIcon} aria-hidden="true">
+            <span className={styles.materialIcon}>search</span>
+          </span>
           <span>Tìm kiếm</span>
           <input
             value={query}
@@ -200,7 +202,9 @@ function History() {
           />
         </label>
         <label className={styles.sortBox}>
-          <i aria-hidden="true" />
+          <span className={styles.toolIcon} aria-hidden="true">
+            <span className={styles.materialIcon}>sort</span>
+          </span>
           <span>Sắp xếp</span>
           <select value={sortMode} onChange={(event) => setSortMode(event.target.value)}>
             <option value="newest">Mới nhất</option>
@@ -209,12 +213,16 @@ function History() {
           </select>
         </label>
         <div className={styles.summaryCard}>
-          <i aria-hidden="true" />
+          <span className={styles.summaryIcon} aria-hidden="true">
+            <span className={styles.materialIcon}>auto_stories</span>
+          </span>
           <strong>{groupedHistory.length}</strong>
           <span>Lần tạo</span>
         </div>
         <div className={styles.summaryCard}>
-          <i aria-hidden="true" />
+          <span className={styles.summaryIcon} aria-hidden="true">
+            <span className={styles.materialIcon}>description</span>
+          </span>
           <strong>{totalPosts}</strong>
           <span>Bài viết</span>
         </div>

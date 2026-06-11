@@ -15,12 +15,12 @@ function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/admin" element={<Admin />} />
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/plans" element={<Plans />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/admin" element={<Admin />} />
           <Route element={<ProtectedRoute />}>
             <Route path="/create-post" element={<CreatePostPage />} />
             <Route path="/history" element={<History />} />

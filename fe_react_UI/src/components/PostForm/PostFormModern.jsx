@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { estimateGeneratePosts, generatePosts, suggestSectionOutlines, suggestWritingStyles } from "@/services/apiService";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,10 +15,22 @@ const splitTags = (value) =>
     .filter(Boolean);
 
 const uniqueTags = (items) => Array.from(new Set(items));
-const AI_MODELS = [
-  { value: "gemini-2.5-flash-lite", label: "Gemini 2.5 Flash-Lite" },
-  { value: "gemini-3-flash-preview", label: "Gemini 3.0 Flash" },
-];
+
+function ModalPortal({ children }) {
+  if (typeof document === "undefined") {
+    return children;
+  }
+
+  return createPortal(children, document.body);
+}
+
+function SuggestIcon({ loading = false }) {
+  return (
+    <span className={`${styles.suggestIcon} ${loading ? styles.suggestIconLoading : ""}`} aria-hidden="true">
+      {loading ? "" : "auto_fix_high"}
+    </span>
+  );
+}
 
 function TagInput({
   label,
@@ -104,7 +117,7 @@ function TagInput({
             title="Gợi ý phong cách viết bằng AI"
             aria-label="Gợi ý phong cách viết bằng AI"
           >
-            {isSuggesting ? "..." : "💡"}
+            <SuggestIcon loading={isSuggesting} />
           </button>
         )}
       </div>
@@ -292,7 +305,7 @@ function stripHtml(html) {
   return (element.textContent || "").replace(/\s+/g, " ").trim();
 }
 
-function ResultsPanel({ posts, modelLabel }) {
+function ResultsPanel({ posts }) {
   const [activePostIndex, setActivePostIndex] = useState(null);
   const [compareMode, setCompareMode] = useState(false);
   const [selectedIndexes, setSelectedIndexes] = useState([]);
@@ -313,7 +326,6 @@ function ResultsPanel({ posts, modelLabel }) {
             Kết quả sinh nội dung
             <InfoHint text={`${posts.length} bài đã tạo. Mở từng bài để đọc chi tiết hoặc chọn vài bài để so sánh.`} />
           </h2>
-          {modelLabel && <p className={styles.resultModelLine}>Phản hồi từ {modelLabel}</p>}
         </div>
         <div className={styles.resultsToolbar}>
           <button
@@ -370,19 +382,23 @@ function ResultsPanel({ posts, modelLabel }) {
       </div>
 
       {activePost && (
-        <ResultReaderModal
-          post={activePost}
-          index={activePostIndex}
-          onClose={() => setActivePostIndex(null)}
-          onPrev={() => setActivePostIndex((current) => Math.max(0, current - 1))}
-          onNext={() => setActivePostIndex((current) => Math.min(posts.length - 1, current + 1))}
-          canPrev={activePostIndex > 0}
-          canNext={activePostIndex < posts.length - 1}
-        />
+        <ModalPortal>
+          <ResultReaderModal
+            post={activePost}
+            index={activePostIndex}
+            onClose={() => setActivePostIndex(null)}
+            onPrev={() => setActivePostIndex((current) => Math.max(0, current - 1))}
+            onNext={() => setActivePostIndex((current) => Math.min(posts.length - 1, current + 1))}
+            canPrev={activePostIndex > 0}
+            canNext={activePostIndex < posts.length - 1}
+          />
+        </ModalPortal>
       )}
 
       {compareOpen && (
-        <CompareModal posts={selectedPosts} onClose={() => setCompareOpen(false)} />
+        <ModalPortal>
+          <CompareModal posts={selectedPosts} onClose={() => setCompareOpen(false)} />
+        </ModalPortal>
       )}
     </section>
   );
@@ -430,7 +446,7 @@ function CompareModal({ posts, onClose }) {
             x
           </button>
         </div>
-        <div className={styles.compareGrid}>
+        <div className={styles.compareGrid} style={{ "--compare-count": posts.length }}>
           {posts.map((post) => (
             <article key={`${post.title}-${post.originalIndex}`} className={styles.compareColumn}>
               <div className={styles.compareColumnHeader}>
@@ -478,10 +494,8 @@ function PostFormModern() {
   const [outlineLayouts, setOutlineLayouts] = useState([]);
   const [suggestingOutlines, setSuggestingOutlines] = useState(false);
   const [openSectionIndex, setOpenSectionIndex] = useState(-1);
-  const [aiModel, setAiModel] = useState("gemini-2.5-flash-lite");
   const [estimate, setEstimate] = useState(null);
   const [estimating, setEstimating] = useState(false);
-  const selectedModelLabel = AI_MODELS.find((model) => model.value === aiModel)?.label || aiModel;
 
   const titleTags = useMemo(() => uniqueTags([...normalizedTitles, ...splitTags(titleDraft)]), [normalizedTitles, titleDraft]);
   const styleTags = useMemo(() => uniqueTags([...splitTags(style), ...splitTags(styleDraft)]), [style, styleDraft]);
@@ -504,8 +518,6 @@ function PostFormModern() {
         word_count: Number(section.word_count),
         description: (section.description || "").trim(),
       })),
-      ai_provider: "vertex_gemini",
-      ai_model: aiModel,
     };
 
     const isValid =
@@ -554,7 +566,7 @@ function PostFormModern() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [user, titleTags, styleTags, sections, aiModel, loading]);
+  }, [user, titleTags, styleTags, sections, loading]);
 
   const loadStyleSuggestions = async () => {
     if (!titleTags.length || titleTags.join(" ").length < 3) {
@@ -627,8 +639,6 @@ function PostFormModern() {
     const data = handleSubmit({
       titles: nextTitles,
       style: nextStyle,
-      ai_provider: "vertex_gemini",
-      ai_model: aiModel,
     });
     if (!data) {
       setError("Vui lòng hoàn thành đầy đủ tiêu đề, phong cách viết và mô tả cho từng mục.");
@@ -660,7 +670,7 @@ function PostFormModern() {
           credit_cost: response.usage.credit_cost,
           credit_balance: response.usage.credit_balance,
           has_enough_credits: true,
-          model: data.ai_model,
+          model: response.usage.model || estimateResponse.model,
         });
       }
     } catch (requestError) {
@@ -691,7 +701,7 @@ function PostFormModern() {
                 <div>
                   <h2 className={styles.sectionTitle}>
                     Thông tin tổng quan
-                    <InfoHint text="Nhập tiêu đề như thẻ YouTube: gõ nội dung, bấm phẩy hoặc Enter để tạo thẻ, chọn x để xóa." />
+                    <InfoHint text="Nhập danh sách tiêu đề cần viết và phong cách mong muốn. Bạn có thể thêm nhiều mục, chỉnh sửa hoặc xóa từng mục trước khi tạo bài." />
                   </h2>
                 </div>
 
@@ -731,7 +741,7 @@ function PostFormModern() {
                   </h2>
                 </div>
                 <button type="button" className={styles.headerSuggestButton} onClick={openOutlineSuggestions} disabled={suggestingOutlines}>
-                  <span aria-hidden="true">💡</span>
+                  <SuggestIcon loading={suggestingOutlines} />
                   {suggestingOutlines ? "Đang gợi ý..." : "Gợi ý cấu trúc"}
                 </button>
               </div>
@@ -772,22 +782,12 @@ function PostFormModern() {
         {loading && (
           <div className={`${styles.bannerLoading} ${styles.geminiResponseLoading}`}>
             <span className={styles.geminiPulse} aria-hidden="true" />
-            <strong>{selectedModelLabel} đang dựng bản nháp</strong>
+            <strong>AI đang dựng bản nháp</strong>
             <em>Đang lập dàn ý, viết từng phần và gom kết quả về giao diện...</em>
           </div>
         )}
         {error && <div className={styles.bannerError}>{error}</div>}
         <div className={styles.sectionActions}>
-          <label className={styles.modelPicker}>
-            <span>Mô hình sinh bài</span>
-            <select value={aiModel} onChange={(event) => setAiModel(event.target.value)} disabled={loading}>
-              {AI_MODELS.map((model) => (
-                <option key={model.value} value={model.value}>
-                  {model.label}
-                </option>
-              ))}
-            </select>
-          </label>
           <div className={styles.creditEstimateCard}>
             <span>Credit hiện có: {Number(estimate?.credit_balance ?? activeSubscription?.credit_balance ?? user?.credit_balance ?? 0).toFixed(6)}</span>
             <strong>
@@ -836,7 +836,7 @@ function PostFormModern() {
         onClose={() => setOutlineModalOpen(false)}
       />
 
-      {posts.length > 0 && <ResultsPanel posts={posts} modelLabel={selectedModelLabel} />}
+      {posts.length > 0 && <ResultsPanel posts={posts} />}
     </div>
   );
 }

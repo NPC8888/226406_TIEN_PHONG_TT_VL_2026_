@@ -5,7 +5,6 @@ import styles from "./Footer.module.css";
 function Footer() {
   return (
     <footer className={styles.footer}>
-      <div className={styles.footerGlow} aria-hidden="true" />
       <div className={styles.footerContent}>
         <div className={styles.footerBrand}>
           <Link to="/" className={styles.brandLine} aria-label="Trang chủ Smomer">
@@ -38,11 +37,6 @@ function Footer() {
 
       <div className={styles.footerBottom}>
         <p>© 2026 Smomer. Thiết kế cho quy trình nội dung hiện đại.</p>
-        <div className={styles.socials} aria-label="Liên kết mạng xã hội">
-          <span aria-label="Facebook">f</span>
-          <span aria-label="Website">◎</span>
-          <span aria-label="Liên hệ">↗</span>
-        </div>
       </div>
     </footer>
   );
